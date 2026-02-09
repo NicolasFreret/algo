@@ -78,21 +78,45 @@ class Cesar{
 
     }
 
+    #stopUnindexAlphabet = () =>{
+        if(this.newIndex > Cesar.#options.alphabet.length - 1) this.newIndex = this.newIndex - Cesar.#options.alphabet.length
+        if(this.newIndex < 0) this.newIndex = Cesar.#options.alphabet.length + this.newIndex
+    }
+
     crypt = _mot =>{
         let crypted = ""
         for (let i = 0; i < _mot.length; i++) {
         let index = Cesar.#options.alphabet.findIndex(l => l == _mot[i].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
 
        if(index !== -1) {
-        let newIndex = Cesar.#options.mode == "crypt" ? index + Cesar.#options.key : Cesar.#options.mode == "decrypt" ? index - Cesar.#options.key : ''
-        if(newIndex > Cesar.#options.alphabet.length - 1) newIndex = newIndex - Cesar.#options.alphabet.length
-        if(newIndex < 0) newIndex = Cesar.#options.alphabet.length + newIndex
-
-        crypted += Cesar.#options.alphabet[newIndex]
+        this.newIndex = index + Cesar.#options.key
+        this.#stopUnindexAlphabet()
+        crypted += Cesar.#options.alphabet[this.newIndex]
        }else{
         crypted += _mot[i]
        } 
 
+    }
+
+        return crypted
+    }   
+
+    decrypt = _mot =>{
+
+        let crypted = ""
+        for (let i = 0; i < _mot.length; i++) {
+        let index = Cesar.#options.alphabet.findIndex(l => l == _mot[i].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+   
+       if(index !== -1) {
+        this.newIndex = index - Cesar.#options.key
+        
+        this.#stopUnindexAlphabet()
+
+        crypted += Cesar.#options.alphabet[this.newIndex]
+       }else{
+        crypted += _mot[i]
+       } 
+        
     }
 
     return crypted
@@ -101,7 +125,70 @@ class Cesar{
 
 }
 
-console.log(new Cesar().key(5).crypt('coucou'))
+
+
+
+
+function formatDate(_date){
+    const d = new Date(),
+    weekDays = new Map([
+        [0,'dimanche'],
+        [1,'lundi'],
+        [2,'mardi'],
+        [3,'mercredi'],
+        [4,'jeudi'],
+        [5,'vendredi'],
+        [6,'samedi']
+    ]),
+    months = new Map([
+        [0,'janvier'], 
+        [1,'février'], 
+        [2,'mars'], 
+        [3,'avril'], 
+        [4,'mai'], 
+        [5,'juin'], 
+        [6,'juillet'], 
+        [7,'août'], 
+        [8,'septembre'], 
+        [9,'octobre'], 
+        [10,'novembre'], 
+        [11,'décembre']
+    ])
+
+
+    function addZero(_number){
+        return _number < 10 ? '0'+ _number : _number
+    }
+
+    const mappingVariables = new Map([
+        ['{L}', weekDays.get(d.getDay())],
+        ['{D}', addZero(d.getDay())],
+        ['{d}', addZero(d.getDate())],
+        ['{M}', months.get(d.getMonth())],
+        ['{m}', addZero(d.getMonth() + 1)],
+        ['{Y}', d.getFullYear()],
+        ['{y}', d.getYear() - 100],
+        ['{h}', addZero(d.getHours())],
+        ['{i}', addZero(d.getMinutes())],
+        ['{s}', addZero(d.getSeconds())] 
+    ])
+
+    let y = _date
+
+    mappingVariables.forEach( (v,k)=>{
+        y = y.replaceAll(k,v)
+    })
+ 
+    return y
+}
+
+
+
+
+
+
+
+
 
 
 
