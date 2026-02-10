@@ -197,20 +197,32 @@ function formatDate(_date,_options={}){
         ['juin',[10626, 50626]],
         ['juillet', [20726, 300726]]
     ])
+    /**
+     * Tableau des jours de repos
+     */
     const daysOff = ['dimanche','lundi']
+    /**
+     * Format des heures (ex: 8h30 => 83000, 10h53 => 105300, 13h25m23s => 132523)
+     */
     const openingTime = new Map([ ['morning', [85959, 123000]], ['afternoon', [132959, 180000]] ])
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Retourn true si la date actuelle est un jour férié français (Source API gouvernenment)
-     * @returns {boolean}
+     * Retourne true si la date actuelle est un jour férié français (Source API gouvernenment)
+     * @returns {{
+     *             isBankHoliday: boolean, 
+     *               text: string
+     *           }}
      */
     const bankHolidays = async () =>{
-        let res = await fetch('https://etalab.github.io/jours-feries-france-data/json/metropole/'+formatDate('{Y}')+'.json')
+        let res = await fetch('https://calendrier.api.gouv.fr/jours-feries/metropole/'+formatDate('{Y}')+'.json')
         res = await res.json()
-        res = Object.keys(res)
-        
-        return res.includes(formatDate('{Y}-{m}-{d}'))  
+        const today = formatDate("{Y}-{m}-{d}"),
+        trueFalse = Object.keys(res).includes(today)
+        return {
+            isBankHoliday: trueFalse,
+            text: trueFalse ? res[today] : 'Pas férié'
+        } 
     }
 
 
@@ -229,12 +241,13 @@ function formatDate(_date,_options={}){
     const time = formatDate("{h}{i}{s}")
     const isDayOff = daysOff.includes(formatDate("{L}"))
     const isOpeningTime = (time > openingTime.get('morning')[0]  && time < openingTime.get('morning')[1]) || (time > openingTime.get('afternoon')[0] && time < openingTime.get('afternoon')[1])
-    const isLunchTime = openingTime.get('morning')[1] < time > openingTime.get('afternoon')[0]
-    const isBankHoliday = await bankHolidays()
+    const isLunchTime = openingTime.get('morning')[1] < time < openingTime.get('afternoon')[0]
+    const {isBankHoliday, text} = await bankHolidays()
 
+  
 
         if(isBankHoliday){
-            console.log(`férié`)
+            console.log(`férié: ${text}`)
         }else if(isHoliday()){
             console.log(`Nous sommes en vacances`)
         }else if(isDayOff){
