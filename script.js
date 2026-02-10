@@ -129,7 +129,7 @@ class Cesar{
 
 
 
-function formatDate(_date){
+function formatDate(_date,_options={}){
     const d = new Date(),
     weekDays = new Map([
         [0,'dimanche'],
@@ -160,6 +160,8 @@ function formatDate(_date){
         return _number < 10 ? '0'+ _number : _number
     }
 
+
+
     const mappingVariables = new Map([
         ['{L}', weekDays.get(d.getDay())],
         ['{D}', addZero(d.getDay())],
@@ -184,6 +186,49 @@ function formatDate(_date){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const daysOff = ['dimanche','lundi']
+const openingTime = new Map([ ['morning', [85959, 123000]], ['afternoon', [132959, 180000]] ])
+const time = formatDate("{h}{i}{s}")
+const isDayOff = daysOff.includes(formatDate("{L}"))
+const isOpeningTime = (time > openingTime.get('morning')[0]  && time < openingTime.get('morning')[1]) || (time > openingTime.get('afternoon')[0] && time < openingTime.get('afternoon')[1])
+const isLunchTime = openingTime.get('morning')[1] < time > openingTime.get('afternoon')[0]
+
+
+
+if(isDayOff){
+    console.log(`Nous sommes ${formatDate("{L}")}, nous sommes fermés`)
+}else if(isOpeningTime){
+    console.log('OUVERT')
+}else if(isLunchTime){
+    console.log("C'est midi, bon appétit")
+}else{
+    console.log('FERME')
+}
 
 
 
